@@ -9,8 +9,6 @@
 import UIKit
 
 class CriaTarefasViewController: UIViewController {
-
-    var telaAnterior = ViewController()
     
     @IBOutlet weak var nomeTarefa: UITextField!
     
@@ -18,13 +16,17 @@ class CriaTarefasViewController: UIViewController {
     
     @IBAction func adicionaTarefa(_ sender: Any) {
     
-        let tarefa = Tarefas()
+        //pega o contexto
+        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        
+        //criaçao de uma entidade
+        let tarefa = Tarefas(context: context)
+        
         tarefa.nome = nomeTarefa.text!
         tarefa.importancia = importancia.isOn
         
-        telaAnterior.tarefas.append(tarefa)//Add no array
-    
-        telaAnterior.tableView.reloadData()//atualiza as informaçoes da tabela
+        //salva
+        (UIApplication.shared.delegate as! AppDelegate).saveContext()
         
         navigationController!
             .popViewController(animated: true)//tras a tela atualizada

@@ -9,7 +9,7 @@
 import UIKit
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+    
     @IBOutlet weak var tableView: UITableView!
     
     var tarefas : [Tarefas] = []
@@ -19,13 +19,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tarefas = fazTarefa()
-        
         tableView.delegate = self
         tableView.dataSource = self
         
         
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        trasTarefas()
+        tableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -34,35 +37,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
-
+        
         rowSelecionada = indexPath.row
         
         if tarefas[rowSelecionada].importancia {
-            cell.textLabel?.text = "❗️\(tarefas[rowSelecionada].nome)"
+            cell.textLabel?.text = "❗️\(tarefas[rowSelecionada].nome!)"
         }else{
-            cell.textLabel?.text = tarefas[rowSelecionada].nome
+            cell.textLabel?.text = tarefas[rowSelecionada].nome!
         }
         
         return cell
-    }
-
-    func fazTarefa() -> [Tarefas] {
-        
-        let tarefa1 = Tarefas()
-        tarefa1.nome = "Passear com o cachorro"
-        tarefa1.importancia = false
-        
-        
-        let tarefa2 = Tarefas()
-        tarefa2.nome = "Comprar birita"
-        tarefa2.importancia = true
-        
-        let tarefa3 = Tarefas()
-        tarefa3.nome = "Comprar miojo"
-        tarefa3.importancia = false
-        
-        return [tarefa1,tarefa2,tarefa3]
-        
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -71,13 +55,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "addTarefa"{
-            let proximaTela = segue.destination as! CriaTarefasViewController
-            proximaTela.telaAnterior = self
-        }
         if segue.identifier == "telaChecagem"{
             let proximaTela = segue.destination as! TarefaCompletaViewController
-            proximaTela.tarefa = sender as! Tarefas
+            proximaTela.tarefa = sender as? Tarefas
             proximaTela.telaAnterior = self
             
         }
@@ -88,13 +68,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         performSegue(withIdentifier: "addTarefa", sender: nil)
     }
-
+    
+    func trasTarefas(){
+        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        
+        do {
+            try tarefas = context.fetch(Tarefas.fetchRequest()) as! [Tarefas]
+        }
+        catch  {
+            print("Erro ao recuperar os dados!")
+        }
+    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
+    
+    
 }
 
